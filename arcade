@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -d /usr/share/pyenv ]; then
+	export PYENV_ROOT="/usr/share/pyenv";
+	export PATH="$PYENV_ROOT/bin:${PATH}";
+	export PATH="$PYENV_ROOT/shims:${PATH}";
+fi
+
+python menu.py
+# ./braille.py
+
