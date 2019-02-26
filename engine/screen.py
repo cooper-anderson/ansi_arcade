@@ -120,10 +120,12 @@ class Screen(object):
 		self.changes = {}
 		self.map = new_map
 
-	def getch(self, timeout=0, flush=True):
+	def getch(self, timeout=0, flush=True, refresh=True):
 		if select([sys.stdin], [], [], timeout) == ([sys.stdin], [], []):
 			s = ord(sys.stdin.read(1))
 			self.flushinp()
+			if refresh and s == 12:
+				self.clear()
 			return s
 		else:
 			return -1
