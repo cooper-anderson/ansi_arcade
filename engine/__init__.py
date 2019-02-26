@@ -64,7 +64,9 @@ class Game(object):
 
 		try:
 			self.start()
-			loop = asyncio.get_event_loop()
+			loop = asyncio.new_event_loop()
+			asyncio.set_event_loop(loop)
+			# loop = asyncio.get_event_loop()
 			tasks = [asyncio.ensure_future(self.__update__()), asyncio.ensure_future(self.__fixed_update__())]
 			loop.run_until_complete(asyncio.wait(tasks))
 			loop.close()
@@ -121,7 +123,7 @@ class Game(object):
 	def close(self):
 		if self.__running:
 			self.__running = False
-			self.screen.close()
+			self.screen.close(False)
 
 	def start(self):
 		pass
