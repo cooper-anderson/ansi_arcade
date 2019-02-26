@@ -118,13 +118,15 @@ class Menu(Game):
 		self.game = ""
 		self.tab = 0
 		self.target = 0
-		self.escaped = False
+		self.escaped = 0
 		self.tab_settings = self.instantiate(Settings)
 		self.tab_library = self.instantiate(Library)
 		self.tab_console = self.instantiate(Console)
 		self.debug = False
 
 	def update(self):
+		if self.escaped == 1:
+			self.escaped = 0
 		c = self.getKeyRaw()
 		if self.debug:
 			self.screen.addstr(0, 0, c)
@@ -140,11 +142,11 @@ class Menu(Game):
 			self.close()
 			return
 		elif c == 27:
-			self.escaped = not self.escaped
+			self.escaped = 2 - self.escaped
 			self.target = self.tab
 		elif c == 10:
 			if self.escaped:
-				self.escaped = False
+				self.escaped = 1
 				self.tab = self.target
 		elif self.escaped and c == ord('h'):
 			self.target = self.target - 1 if self.target > 0 else 3
