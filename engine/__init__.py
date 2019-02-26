@@ -82,9 +82,10 @@ class Game(object):
 				self.__last_time = t
 				self.__char = self.screen.getch()
 				self.update()
-				for gameObject in self.gameObjects.copy().values():
+				UUIDs = self.gameObjects.copy().values()
+				for gameObject in UUIDs:
 					gameObject.update()
-				for gameObject in self.gameObjects.copy().values():
+				for gameObject in UUIDs:
 					gameObject.late_update()
 				await asyncio.sleep(1.0 / 30.0)
 		except Exception as e:
