@@ -4,6 +4,11 @@
 from engine import Game, GameObject
 from engine.color import Color
 from engine.elements.box import Box
+from engine.elements.selector import Selector
+
+import braille
+import dithering
+import puzzle
 
 color_bar = [Color(r=215, g=215, b=105), Color(r=88, g=88, b=88)]
 color_bar_active = [Color(r=200, g=200, b=200), Color(r=174, g=96, b=96)]
@@ -12,12 +17,15 @@ color_button_active = [Color(r=0, g=0, b=0), Color(r=125, g=215, b=85)]
 color_box = [Color(r=255, g=255, b=255), -1]
 color_box_active = [Color(r=215, g=96, b=96), -1]
 
-games = {"Braille": "braille.py", "Dithering": "dithering.py", "2D Rubics Cube": "puzzle.py", "Exit": "-1"}
+games = ["2D Rubics Cube", "Dithering", "Braille"]
+descriptions = {"2D Rubics Cube": "Slide letters and numbers to reorganize", "Dithering": "Render geometry with dithering", "Braille": "Learn Braille"}
+executables = {"2D Rubics Cube": puzzle.Puzzle, "Dithering": dithering.Braille, "Braille": braille.Braille}
+games.sort()
 
 
 class Library(GameObject):
 	def start(self):
-		self.box_games = Box("games")
+		self.box_games = Selector("games", games)
 		self.box_description = Box("description")
 		self.resize()
 		self.selected = 0
@@ -31,13 +39,22 @@ class Library(GameObject):
 				self.selected = self.selected - 1 if self.selected > 0 else 1
 			elif c == ord('l'):
 				self.selected = self.selected + 1 if self.selected < 1 else 0
+			if self.selected == 0:
+				if c == ord('j'):
+					self.box_games.down()
+				elif c == ord('k'):
+					self.box_games.up()
+				elif c == 10:
+					self.game.game = self.box_games.get()
+					self.game.close()
+			self.game.screen.addstr(2, 23, descriptions[self.box_games.get()])
 
 	def resize(self):
 		self.box_games.set_pos(0, 0, self.game.screen.width // 4, self.game.screen.height - 4)
 		self.box_description.set_pos(self.game.screen.width // 4, 0, 3 * self.game.screen.width // 4, self.game.screen.height - 4)
 
 	def draw(self):
-		self.box_games.draw(self.game.screen, color_box_active[0] if self.selected == 0 else color_box[0], color_box_active[1] if self.selected == 0 else color_box[1])
+		self.box_games.draw(self.game.screen, [color_box_active[0] if self.selected == 0 else color_box[0], color_box_active[1] if self.selected == 0 else color_box[1]], [-1, -1], color_button_active)
 		self.box_description.draw(self.game.screen, color_box_active[0] if self.selected == 1 else color_box[0], color_box_active[1] if self.selected == 0 else color_box[1])
 
 
@@ -98,6 +115,7 @@ class Console(GameObject):
 
 class Menu(Game):
 	def start(self):
+		self.game = ""
 		self.tab = 0
 		self.target = 0
 		self.escaped = False
@@ -152,4 +170,13 @@ class Menu(Game):
 
 if __name__ == "__main__":
 	menu = Menu()
+	if menu.game in executables:
+		executables[menu.game]()
+	# while True:
+	# 	menu = Menu()
+	# 	if menu.game == "":
+	# 		break
+	# 	if menu.game in executables:
+	# 		executables[menu.game]()
+
 
