@@ -1,46 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-from engine import GameObject
-from engine.elements import Box, Selector
+from engine.elements import Tab, List, Box, Selector
 
 from tabs import colors
-from tabs import games
+# from tabs import games
 
 
-class Library(GameObject):
+class Games(Box):
 	def start(self):
-		self.selector_games = Selector("games", games.games)
-		self.box_description = Box("description")
-		self.box_search = Box("search")
-		self.resize()
-		self.selected = 0
+		self.list = self.add_child(Selector).set_loop(False).set_colors(colors.default, colors.button_active).set_items(["test" + str(i) for i in range(11)])
 
-	def update(self):
-		self.resize()
-		if self.game.tab == 0:
-			self.draw()
-			c = -1 if self.game.escaped else self.game.getKeyRaw()
-			if c == ord('h'):
-				self.selected = self.selected - 1 if self.selected > 0 else 2
-			elif c == ord('l'):
-				self.selected = self.selected + 1 if self.selected < 2 else 0
-			if self.selected == 0:
-				if c == ord('j'):
-					self.selector_games.down()
-				elif c == ord('k'):
-					self.selector_games.up()
-				elif c == 10:
-					self.game.game = self.selector_games.get()
-					self.game.close()
-			self.game.screen.addstr(2, 23, games.descriptions[self.selector_games.get()])
+	def update(self, c=-1):
+		if c == ord('j'):
+			self.list.next()
+		elif c == ord('k'):
+			self.list.prev()
 
 	def resize(self):
-		self.selector_games.set_pos(0, 0, self.game.screen.width // 4, self.game.screen.height - 4)
-		self.box_description.set_pos(self.game.screen.width // 4, 0, 3 * self.game.screen.width // 4, self.game.screen.height - 4)
-		self.box_search.set_pos(0, self.game.screen.height - 4, self.game.screen.width, 3)
+		self.set_pos(0, 0, self.parent.width // 4, self.parent.height - 3)
 
-	def draw(self):
-		self.selector_games.draw(self.game.screen, [colors.box_active[0] if self.selected == 0 else colors.box[0], colors.box_active[1] if self.selected == 0 else colors.box[1]], [-1, -1], colors.button_active)
-		self.box_description.draw(self.game.screen, colors.box_active[0] if self.selected == 1 else colors.box[0], colors.box_active[1] if self.selected == 1 else colors.box[1])
-		self.box_search.draw(self.game.screen, colors.box_active[0] if self.selected == 2 else colors.box[0], colors.box_active[1] if self.selected == 2 else colors.box[1])
+
+class Description(Box):
+	def update(self, c=-1):
+		self.addstr(0, 0, c)
+
+	def resize(self):
+		self.set_pos(self.parent.width // 4, 0, 3 * self.parent.width // 4, self.parent.height - 3)
+
+
+class Search(Box):
+	def update(self, c=-1):
+		self.addstr(0, 1, self.parent.parent.box_games.list.get())
+
+	def resize(self):
+		self.set_pos(0, self.parent.height - 3, self.parent.width, 3)
+
+
+class Library(Tab):
+	def start(self):
+		self.list = self.add_child(List)
+		self.list.set_colors(colors.box, colors.box_active)
+		self.box_games = self.list.add_child(Games).set_label("games")
+		self.box_description = self.list.add_child(Description).set_label("description")
+		self.box_search = self.list.add_child(Search).set_label("search")
+
+	def update(self, c=-1):
+		# self.draw()
+		self.addstr(0, 0, c)
+		if c == ord('h'):
+			self.list.prev()
+		elif c == ord('l'):
+			self.list.next()
+
+	def resize(self):
+		self.set_pos(0, 0, self.screen.width, self.screen.height - 1)
+

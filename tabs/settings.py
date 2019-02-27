@@ -1,34 +1,89 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-from engine import GameObject
-from engine.elements import Box
+from engine.elements import Element, Tab, List, Box
 
 from tabs import colors
 
 
-class Settings(GameObject):
+class Item(Element):
 	def start(self):
-		self.box_browse = Box("browse")
-		self.box_view = Box("view")
-		self.resize()
-		self.selected = 0
-
-	def update(self):
-		self.resize()
-		if self.game.tab == 1:
-			self.draw()
-			c = -1 if self.game.escaped else self.game.getKeyRaw()
-			if c == ord('h'):
-				self.selected = self.selected - 1 if self.selected > 0 else 1
-			elif c == ord('l'):
-				self.selected = self.selected + 1 if self.selected < 1 else 0
-
-	def resize(self):
-		self.box_browse.set_pos(0, 0, self.game.screen.width // 3, self.game.screen.height // 2)
-		self.box_view.set_pos(self.game.screen.width // 3, 0, 2 * self.game.screen.width // 3 + 1, self.game.screen.height // 2)
+		self.set_label(" > Item" + str(self.element_id))
 
 	def draw(self):
-		self.box_browse.draw(self.game.screen, colors.box_active[0] if self.selected == 0 else colors.box[0], colors.box_active[1] if self.selected == 0 else colors.box[1])
-		self.box_view.draw(self.game.screen, colors.box_active[0] if self.selected == 1 else colors.box[0], colors.box_active[1] if self.selected == 0 else colors.box[1])
+		if self.element_id < self.parent.height - 2:
+			self.parent.addstr(self.element_id, 0, self.label + ' ' * (self.parent.width - len(self.label) - 2), self.fg, self.bg)
+
+
+class Browse(Box):
+	def resize(self):
+		self.set_pos(0, 0, self.parent.width // 3, self.parent.height // 2)
+
+
+class View(Box):
+	def resize(self):
+		self.set_pos(self.parent.width // 3, 0, 2 * self.parent.width // 3 + 1, self.parent.height // 2)
+
+
+class InnerList(List):
+	# def __init__(self):
+	# 	super().__init__()
+	# 	self.set_colors(colors.box, colors.box_active)
+
+	def update(self, c=-1):
+		if c == ord('j'):
+			self.next()
+		elif c == ord('k'):
+			self.prev()
+
+	def __update__(self, c=-1):
+		self.resize()
+		self.update(c)
+		self.draw()
+		self.moved -= 1 if self.moved else 0
+		for child in self.children:
+			color = self.color_active if self.selected == child.element_id and self.parent.selected == self.element_id else self.color_default
+			child.set_color(color[0], color[1])
+			child.__update__(c if self.selected == child.element_id and not self.moved else -1)
+
+
+class Dropdown(InnerList):
+	def start(self):
+		self.set_colors(colors.box, colors.box_active)
+		for i in range(8):
+			self.add_child(Item)
+
+	def resize(self):
+		self.set_pos(0, self.parent.height // 2, self.parent.width // 2 - 1, self.parent.height // 2 + 1)
+
+
+class Checkbox(InnerList):
+	def start(self):
+		self.set_colors(colors.box, colors.box_active)
+		for i in range(8):
+			child = self.add_child(Item)
+			child.set_label('[' + ('x' if i % 2 else ' ') + "] Checkbox " + str(i))
+
+	def resize(self):
+		self.set_pos(self.parent.width // 2 - 1, self.parent.height // 2, self.parent.width // 2 + 1, self.parent.height // 2 + 1)
+
+
+class Settings(Tab):
+	def start(self):
+		self.list = self.add_child(List)
+		self.list.set_colors(colors.box, colors.box_active)
+		self.box_browse = self.list.add_child(Browse).set_label("browse")
+		self.box_view = self.list.add_child(View).set_label("view")
+		self.list_dropdown = self.list.add_child(Dropdown)
+		self.list_checkbox = self.list.add_child(Checkbox)
+
+	def update(self, c=-1):
+		self.addstr(0, 0, c)
+		if c == ord('h'):
+			self.list.prev()
+		elif c == ord('l'):
+			self.list.next()
+
+	def resize(self):
+		self.set_pos(0, 0, self.screen.width, self.screen.height - 1)
 
