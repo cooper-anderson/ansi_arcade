@@ -55,6 +55,7 @@ class Screen(object):
 		t = termios.tcgetattr(1)
 		t[3] &= ~(termios.ECHO | termios.ICANON)  # | termios.OPOST)
 		termios.tcsetattr(1, termios.TCSANOW, t)
+		self.paused = False
 		self._resize()
 		self.queue = ""
 		self.map = {}
@@ -64,16 +65,31 @@ class Screen(object):
 		signal(SIGWINCH, self._resize)
 
 	def _resize(self, a=0, b=0):
-		buf = array('h', [0, 0])
-		ioctl(1, termios.TIOCGWINSZ, buf, 1)
-		self.size.width = buf.pop()
-		self.size.height = buf.pop()
-		self.width = self.size.width
-		self.height = self.size.height
-		self.clear()
+		if not self.paused:
+			buf = array('h', [0, 0])
+			ioctl(1, termios.TIOCGWINSZ, buf, 1)
+			self.size.width = buf.pop()
+			self.size.height = buf.pop()
+			self.width = self.size.width
+			self.height = self.size.height
+			self.clear()
 
 	def clear(self):
 		print(ESC + "2J", end="")
+
+	def pause(self):
+		self.paused = True
+		self.close(False)
+
+	def resume(self):
+		self.paused = False
+		print(ESC + "?1049h" + ESC + "?25l" + ESC + "2J", end="")
+		self.size = Size()
+		self._initial = termios.tcgetattr(1)
+		t = termios.tcgetattr(1)
+		t[3] &= ~(termios.ECHO | termios.ICANON)  # | termios.OPOST)
+		termios.tcsetattr(1, termios.TCSANOW, t)
+		self._resize()
 
 	def close(self, verbose=True):
 		termios.tcsetattr(1, termios.TCSANOW, self._initial)
