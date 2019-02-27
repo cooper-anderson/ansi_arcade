@@ -164,8 +164,9 @@ class Braille(Game):
 		self.screen.refresh()
 
 	def save(self):
-		with open(self.file_name, 'w') as file:
-			file.write(json.dumps(self.data).replace(' ', ""))
+		if self.user != "default":
+			with open(self.file_name, 'w') as file:
+				file.write(json.dumps(self.data).replace(' ', ""))
 
 
 if __name__ == "__main__":

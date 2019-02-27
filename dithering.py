@@ -335,6 +335,7 @@ class Braille(Game):
 		# self.screen.addstr(self.screen.height - 2, self.screen.width - 28, "z x c v b n m , . / shft")
 		if self.c == ord('p'):
 			self.close()
+			return
 		elif self.c != -1:
 			self.screen.addstr(1, 0, chr(self.c))
 		# if self.clear:

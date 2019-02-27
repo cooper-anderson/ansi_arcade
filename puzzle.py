@@ -2,7 +2,7 @@
 # -*- coding: utf8 -*-
 
 from engine import Game, GameObject
-from engine.color import Color, Colors
+from engine.color import Colors
 from random import randint
 from os import environ
 from time import sleep
@@ -156,7 +156,6 @@ class Selector(GameObject):
 
 class Puzzle(Game):
 	def start(self):
-		self.randomizing = True
 		# self.screen.curses.start_color()
 		# self.screen.curses.init_pair(2, self.screen.curses.COLOR_WHITE, self.screen.curses.COLOR_BLACK)
 		# self.screen.curses.init_pair(3, self.screen.curses.COLOR_BLACK, self.screen.curses.COLOR_WHITE)
@@ -165,6 +164,10 @@ class Puzzle(Game):
 		# 	self.screen.curses.init_color(i+1, 750, int((i % 5) / 5 * 1250), int((i // 5) / 1250))
 		# 	self.screen.curses.init_pair(i+1, i+1, i+1)
 		self.grid = self.instantiate(Grid)
+		self.reset()
+
+	def reset(self):
+		self.randomizing = True
 		self.running = False
 		self.waiting = False
 		self.victory = False
@@ -196,6 +199,13 @@ class Puzzle(Game):
 			self.screen.addstr(self.grid.height + 1, self.grid.width * 4 + 10, "Victory!")
 		self.running = self.running and not self.check_win()
 		self.victory = self.check_win()
+		c = self.getKeyRaw()
+		if c == ord('q'):
+			self.close()
+			return
+		elif c == ord('r'):
+			self.reset()
+			return
 		if self.randomizing or self.waiting:
 			self.time -= self.delta_time
 		self.time += self.delta_time if self.running else 0

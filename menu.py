@@ -28,7 +28,6 @@ class Menu(object):
 		elif c == ord('`'):
 			self.target = 2
 		elif self.tab == 3 or c == 4:
-			self.screen.close()
 			self.running = False
 			return
 		elif c == 27:

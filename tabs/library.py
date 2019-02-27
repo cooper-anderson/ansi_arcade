@@ -20,7 +20,13 @@ class Games(Box):
 			self.list.prev()
 		elif c == 10:
 			self.screen.pause()
-			games.executables[self.list.get()]()
+			try:
+				games.executables[self.list.get()]()
+			except Exception as e:
+				self.parent.parent.running = False
+				self.screen.close()
+				raise e
+			# self.parent.parent.running = False
 			self.screen.resume()
 
 	def resize(self):
