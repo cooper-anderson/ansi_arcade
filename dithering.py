@@ -281,6 +281,7 @@ class Braille(Game):
 		self.correction = [0, 1, 2, 6, 3, 4, 5, 7]
 		self.fountain = False
 		self.clear = True
+		self.monochrome = False
 		self.c = -1
 		self.f = 0
 
@@ -294,6 +295,8 @@ class Braille(Game):
 			self.fountain = not self.fountain
 		elif c == ord('m'):
 			self.clear = not self.clear
+		elif c == ord('n'):
+			self.monochrome = not self.monochrome
 		if self.fountain:
 			p = self.instantiate(Particle)
 			p.x = self.screen.width
@@ -304,7 +307,7 @@ class Braille(Game):
 		self.screen.addstr(0, self.screen.width - len(delta_time), delta_time)
 		self.screen.addstr(1, self.screen.width - len(fixed_delta_time), fixed_delta_time)
 		self.screen.addstr(0, 0, gameObjects)
-		color = Color(h=self.f * 2, s=1.0, l=0.5).toRGB()
+		color = Color(h=(self.f * 2) if not self.monochrome else 0, s=1.0, l=0.5).toRGB()
 		"""for y, row in enumerate(self.map):
 			for x, column in enumerate(row):
 				# if True in self.map[y][x]:
@@ -327,7 +330,7 @@ class Braille(Game):
 			layer = keyboard[i]
 			offset = i - 1 if i > 1 else 0
 			for s in layer:
-				self.screen.addstr(self.screen.height - 5 + i, self.screen.width - 25 + offset, s)
+				self.screen.addstr(self.screen.height - 5 + i, self.screen.width - 25 + offset, s, Colors.green if s in "wasdqezxcvrfmnohjkl" else Colors.white)
 				offset += 2
 		# self.screen.addstr(self.screen.height - 5, self.screen.width - 30, "1 2 3 4 5 6 7 8 9 0 - =")
 		# self.screen.addstr(self.screen.height - 4, self.screen.width - 30, "q w e r t y u i o p [ ] \\")
