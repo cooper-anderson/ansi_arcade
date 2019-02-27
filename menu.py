@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf8 -*-
 
-from engine import Game
+from engine.screen import Screen
 from tabs import Library, Settings, Console, games, colors
 
 
-class Menu(Game):
-	def start(self):
-		self.game = ""
+class Menu(object):
+	def __init__(self):
+		self.screen = Screen()
+		self.running = True
 		self.tab = 0
 		self.target = 0
 		self.escaped = 0
 		self.tabs = [Library(self.screen), Settings(self.screen), Console(self.screen)]
-		# self.tab_settings = Settings(self.screen)
-		# self.tab_settings = self.instantiate(Settings)
-		# self.tab_console = self.instantiate(Console)
 		self.debug = False
 
 	def update(self):
 		if self.escaped == 1:
 			self.escaped = 0
-		c = self.getKeyRaw()
+		c = self.screen.getch()
 		if c == 127:
 			self.debug = not self.debug
 		if c == ord('a'):
@@ -30,7 +28,8 @@ class Menu(Game):
 		elif c == ord('`'):
 			self.target = 2
 		elif self.tab == 3 or c == 4:
-			self.close()
+			self.screen.close()
+			self.running = False
 			return
 		elif c == 27:
 			self.escaped = 2 - self.escaped
@@ -66,7 +65,12 @@ class Menu(Game):
 
 
 if __name__ == "__main__":
-	menu = Menu()
-	if menu.game in games.executables:
-		games.executables[menu.game]()
+	try:
+		menu = Menu()
+		while menu.running:
+			menu.update()
+	except KeyboardInterrupt:
+		pass
+	finally:
+		menu.screen.close()
 

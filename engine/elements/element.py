@@ -38,7 +38,8 @@ class Element(object):
 		return self
 
 	def addstr(self, y=0, x=0, string="", fg=-1, bg=-1):
-		self.parent.addstr(self.y + y + 1, self.x + x + 1, string, fg, bg)
+		if x < self.width and y < self.height - 2:
+			self.parent.addstr(self.y + y + 1, self.x + x + 1, string, fg, bg)
 
 	def start(self):
 		pass
