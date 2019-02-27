@@ -64,17 +64,19 @@ class Game(object):
 
 		try:
 			self.start()
-			loop = asyncio.new_event_loop()
-			asyncio.set_event_loop(loop)
+			self.loop = asyncio.new_event_loop()
+			asyncio.set_event_loop(self.loop)
 			# loop = asyncio.get_event_loop()
 			tasks = [asyncio.ensure_future(self.__update__()), asyncio.ensure_future(self.__fixed_update__())]
-			loop.run_until_complete(asyncio.wait(tasks))
-			loop.close()
+			self.loop.run_until_complete(asyncio.wait(tasks))
 		except KeyboardInterrupt:
-			self.close()
 			pass
 		finally:
 			self.close()
+			pending = asyncio.Task.all_tasks()
+			self.loop.run_until_complete(asyncio.gather(*pending))
+			self.loop.stop()
+			self.loop.close()
 
 	async def __update__(self):
 		try:
