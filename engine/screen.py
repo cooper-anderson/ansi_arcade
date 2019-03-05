@@ -147,7 +147,7 @@ class Screen(object):
 			return -1
 
 	def flushinp(self):
-		termios.tcflush(sys.stdin, termios.TCIOFLUSH)
+		termios.tcflush(sys.stdin, termios.TCIFLUSH)
 
 	def autoflushinp(self, flag=True):
 		pass
