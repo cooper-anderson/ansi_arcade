@@ -48,6 +48,20 @@ class GameObject(object):
 		pass
 
 
+class DebugLog(GameObject):
+	def start(self):
+		self.enabled = False
+		self.log = []
+
+	def update(self):
+		c = self.game.getKeyRaw()
+		if c == 96:
+			self.enabled = not self.enabled
+		if self.enabled:
+			for index, message in enumerate(self.log):
+				self.game.screen.addstr(0 + index, 0, message)
+
+
 class Game(object):
 	def __init__(self):
 		self.screen = screen.Screen()
@@ -61,6 +75,7 @@ class Game(object):
 		self.__last_fixed_time = self.start_time
 		self.__running = True
 		self.__char = -1
+		self.__logger = None
 
 		try:
 			self.start()
@@ -91,6 +106,7 @@ class Game(object):
 					gameObject.update()
 				for gameObject in UUIDs:
 					gameObject.late_update()
+				self.late_update()
 				await asyncio.sleep(1.0 / 30.0)
 		except Exception as e:
 			self.close()
@@ -133,8 +149,18 @@ class Game(object):
 	def update(self):
 		pass
 
+	def late_update(self):
+		pass
+
 	def fixed_update(self):
 		pass
+
+	def log(self, message):
+		if self.__logger is None:
+			self.__logger = self.instantiate(DebugLog)
+		if len(self.__logger.log) == 5:
+			self.__logger.log = self.__logger.log[1:]
+		self.__logger.log.append(message)
 
 
 __all__ = ["GameObject", "Game"]
