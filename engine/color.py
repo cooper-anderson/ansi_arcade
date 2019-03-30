@@ -2,12 +2,12 @@
 
 def toHEX(number):
 	digits = "0123456789ABCDEF"
-	return digits[number // 16] + digits[int(number % 16)]
+	return digits[int(number // 16)] + digits[int(number % 16)]
 
 
 def fromHEX(number):
 	digits = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'A': 10, 'B': 11, 'C': 12, 'D': 13, 'E': 14, 'F': 15}
-	return digits[number[0]] * 16.0 + digits[number[1]]
+	return digits[number[0]] * 16 + digits[number[1]]
 
 
 def hueToRGB(p, q, t):
@@ -43,7 +43,7 @@ class Color(object):
 			self._data = [float(kwargs['h'] % 360), float(kwargs['s']), float(kwargs['l'])]
 		elif 'hex' in kwargs:
 			self.colorMode = ColorMode.HEX
-			self._data = kwargs['hex']
+			self._data = kwargs['hex'].upper()  # (kwargs['hex'][1:] if kwargs['hex'][0] == '#' else kwargs['hex']).upper()
 		if 'a' in kwargs:
 			self._alpha = kwargs['a']
 
